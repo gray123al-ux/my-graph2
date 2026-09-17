@@ -82,3 +82,63 @@ st.text_area(
     height=80,
     key="graph1_note"
 )
+# =========================================================
+# 3. 총 관객 분포
+# =========================================================
+
+st.header("3. 영화별 총 관객 분포")
+
+# 총 관객을 숫자로 변환
+df["total_audi"] = pd.to_numeric(df["total_audi"], errors="coerce")
+
+# 결측값 제거
+hist_df = df.dropna(subset=["total_audi"]).copy()
+
+fig3 = px.histogram(
+    hist_df,
+    x="total_audi",
+    nbins=20,
+    title="영화별 총 관객 분포",
+    labels={
+        "total_audi": "총 관객 수",
+        "count": "영화 편수"
+    }
+)
+
+fig3.update_traces(
+    hovertemplate=(
+        "총 관객 구간: %{x}<br>"
+        "영화 편수: %{y}편"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig3, use_container_width=True)
+
+# 가장 관객이 많은 영화 찾기
+max_movie = hist_df.loc[hist_df["total_audi"].idxmax()]
+
+max_movie_name = max_movie["movieNm"]
+max_movie_audi = int(max_movie["total_audi"])
+
+# 가장 많이 몰린 구간 찾기
+counts, bins = pd.cut(
+    hist_df["total_audi"],
+    bins=20,
+    retbins=True
+)
+most_common_bin = counts.value_counts().idxmax()
+
+st.info(
+    f"대부분의 영화는 총 관객 **{most_common_bin.left:,.0f}명 ~ "
+    f"{most_common_bin.right:,.0f}명** 구간에 몰려 있습니다. "
+    f"가장 관객이 많은 영화는 **{max_movie_name}**으로, "
+    f"총 **{max_movie_audi:,}명**입니다."
+)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="영화들의 총 관객 수가 어느 구간에 많이 몰려 있는지 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph3_note"
+)
