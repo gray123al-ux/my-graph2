@@ -83,6 +83,62 @@ st.text_area(
     key="graph1_note"
 )
 # =========================================================
+# 2. 장르 안에 영화가 들어 있는 트리맵
+# =========================================================
+
+st.header("2. 장르별 영화와 총 관객")
+
+treemap_df = df.copy()
+
+treemap_df["total_audi"] = pd.to_numeric(
+    treemap_df["total_audi"],
+    errors="coerce"
+)
+
+treemap_df["genre"] = (
+    treemap_df["genre"]
+    .fillna("미상")
+    .astype(str)
+    .str.split("|")
+    .str[0]
+    .str.strip()
+)
+
+treemap_df = treemap_df.dropna(
+    subset=["genre", "movieNm", "total_audi"]
+)
+
+treemap_df = treemap_df[treemap_df["total_audi"] > 0]
+
+fig2 = px.treemap(
+    treemap_df,
+    path=["genre", "movieNm"],
+    values="total_audi",
+    title="장르 안에 영화가 들어 있는 트리맵",
+    labels={
+        "genre": "장르",
+        "movieNm": "영화",
+        "total_audi": "총 관객"
+    }
+)
+
+fig2.update_traces(
+    hovertemplate=(
+        "<b>%{label}</b><br>"
+        "총 관객: %{value:,}명"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="장르별로 어떤 영화가 많은 관객을 모았는지 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph2_note"
+)
+# =========================================================
 # 3. 총 관객 분포
 # =========================================================
 
