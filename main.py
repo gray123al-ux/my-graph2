@@ -198,3 +198,63 @@ st.text_area(
     height=80,
     key="graph4_note"
 )
+# =========================================================
+# 5. 장르별 총 관객 분포
+# =========================================================
+
+st.header("5. 장르별 총 관객 분포")
+
+box_df = df.copy()
+
+# 총 관객을 숫자로 변환
+box_df["total_audi"] = pd.to_numeric(
+    box_df["total_audi"],
+    errors="coerce"
+)
+
+# 장르와 총 관객이 없는 행 제거
+box_df = box_df.dropna(
+    subset=["genre", "total_audi", "movieNm"]
+)
+
+# 영화가 10편 이상인 장르만 선택
+genre_movie_counts = box_df["genre"].value_counts()
+
+valid_genres = genre_movie_counts[
+    genre_movie_counts >= 10
+].index
+
+box_df = box_df[
+    box_df["genre"].isin(valid_genres)
+]
+
+fig5 = px.box(
+    box_df,
+    x="genre",
+    y="total_audi",
+    points="outliers",
+    color="genre",
+    title="영화가 10편 이상인 장르의 총 관객 분포",
+    labels={
+        "genre": "장르",
+        "total_audi": "총 관객"
+    },
+    custom_data=["movieNm"]
+)
+
+fig5.update_traces(
+    hovertemplate=(
+        "<b>%{customdata[0]}</b><br>"
+        "총 관객: %{y:,}명"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="장르별 총 관객의 분포와 차이를 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph5_note"
+)
