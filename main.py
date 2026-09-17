@@ -258,3 +258,189 @@ st.text_area(
     height=80,
     key="graph5_note"
 )
+# =========================================================
+# 6. 첫 주 관객을 크기로 나타낸 버블 그래프
+# =========================================================
+
+st.header("6. 첫 주 관객과 총 관객의 관계")
+
+bubble_df = df.copy()
+
+# 숫자형으로 변환
+bubble_df["first_scrn"] = pd.to_numeric(
+    bubble_df["first_scrn"],
+    errors="coerce"
+)
+
+bubble_df["total_audi"] = pd.to_numeric(
+    bubble_df["total_audi"],
+    errors="coerce"
+)
+
+bubble_df["first_week_audi"] = pd.to_numeric(
+    bubble_df["first_week_audi"],
+    errors="coerce"
+)
+
+# 필요한 값이 없는 행 제거
+bubble_df = bubble_df.dropna(
+    subset=[
+        "first_scrn",
+        "total_audi",
+        "first_week_audi",
+        "movieNm",
+        "genre"
+    ]
+)
+
+fig6 = px.scatter(
+    bubble_df,
+    x="first_scrn",
+    y="total_audi",
+    size="first_week_audi",
+    color="genre",
+    hover_name="movieNm",
+    title="개봉일 스크린수와 총 관객 — 버블 크기는 첫 주 관객",
+    labels={
+        "first_scrn": "개봉일 스크린수",
+        "total_audi": "총 관객",
+        "first_week_audi": "첫 주 관객",
+        "genre": "장르"
+    },
+    custom_data=["first_week_audi"]
+)
+
+fig6.update_traces(
+    marker=dict(
+        opacity=0.65,
+        sizemin=5
+    ),
+    hovertemplate=(
+        "<b>%{hovertext}</b><br>"
+        "개봉일 스크린수: %{x:,}개<br>"
+        "총 관객: %{y:,}명<br>"
+        "첫 주 관객: %{customdata[0]:,}명"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig6, use_container_width=True)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="개봉일 스크린수, 첫 주 관객, 총 관객 사이의 관계를 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph6_note"
+)
+# =========================================================
+# 7. 제작 국가 → 장르 선버스트
+# =========================================================
+
+st.header("7. 제작 국가와 장르별 영화 구성")
+
+sunburst_df = df.copy()
+
+# 제작 국가와 장르가 없는 데이터 처리
+sunburst_df["nation"] = (
+    sunburst_df["nation"]
+    .fillna("미상")
+    .astype(str)
+    .str.strip()
+)
+
+sunburst_df["genre"] = (
+    sunburst_df["genre"]
+    .fillna("미상")
+    .astype(str)
+    .str.strip()
+)
+
+# 국가 → 장르별 영화 편수 계산
+sunburst_counts = (
+    sunburst_df
+    .groupby(["nation", "genre"])
+    .size()
+    .reset_index(name="영화 편수")
+)
+
+fig7 = px.sunburst(
+    sunburst_counts,
+    path=["nation", "genre"],
+    values="영화 편수",
+    title="제작 국가 → 장르별 영화 구성",
+)
+
+fig7.update_traces(
+    hovertemplate=(
+        "<b>%{label}</b><br>"
+        "영화 편수: %{value}편<br>"
+        "전체 비율: %{percentRoot:.1%}"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig7, use_container_width=True)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="제작 국가별로 어떤 장르의 영화가 많이 포함되어 있는지 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph7_note"
+)
+# =========================================================
+# 8. 10위권 체류 기간과 총 관객의 관계
+# =========================================================
+
+st.header("8. 10위권에 오래 머문 영화는 총 관객도 많은가")
+
+scatter8_df = df.copy()
+
+# 숫자형으로 변환
+scatter8_df["days_in_top10"] = pd.to_numeric(
+    scatter8_df["days_in_top10"],
+    errors="coerce"
+)
+
+scatter8_df["total_audi"] = pd.to_numeric(
+    scatter8_df["total_audi"],
+    errors="coerce"
+)
+
+# 필요한 값이 없는 행 제거
+scatter8_df = scatter8_df.dropna(
+    subset=["days_in_top10", "total_audi", "movieNm"]
+)
+
+fig8 = px.scatter(
+    scatter8_df,
+    x="days_in_top10",
+    y="total_audi",
+    hover_name="movieNm",
+    title="10위권에 오래 머문 영화는 총 관객도 많은가",
+    labels={
+        "days_in_top10": "10위권에 머문 날수",
+        "total_audi": "총 관객"
+    }
+)
+
+fig8.update_traces(
+    marker=dict(
+        size=10,
+        opacity=0.7
+    ),
+    hovertemplate=(
+        "<b>%{hovertext}</b><br>"
+        "10위권에 머문 날수: %{x}일<br>"
+        "총 관객: %{y:,}명"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig8, use_container_width=True)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="10위권에 머문 날수와 총 관객의 관계를 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph8_note"
+)
