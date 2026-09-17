@@ -142,3 +142,59 @@ st.text_area(
     height=80,
     key="graph3_note"
 )
+# =========================================================
+# 4. 개봉일 스크린수와 총 관객의 관계
+# =========================================================
+
+st.header("4. 개봉일 스크린수와 총 관객의 관계")
+
+scatter_df = df.copy()
+
+# 숫자형으로 변환
+scatter_df["first_scrn"] = pd.to_numeric(
+    scatter_df["first_scrn"],
+    errors="coerce"
+)
+
+scatter_df["total_audi"] = pd.to_numeric(
+    scatter_df["total_audi"],
+    errors="coerce"
+)
+
+# 필요한 값이 없는 행 제거
+scatter_df = scatter_df.dropna(
+    subset=["first_scrn", "total_audi", "movieNm", "genre"]
+)
+
+fig4 = px.scatter(
+    scatter_df,
+    x="first_scrn",
+    y="total_audi",
+    color="genre",
+    hover_name="movieNm",
+    title="개봉일 스크린수와 총 관객의 관계",
+    labels={
+        "first_scrn": "개봉일 스크린수",
+        "total_audi": "총 관객",
+        "genre": "장르"
+    }
+)
+
+fig4.update_traces(
+    marker=dict(size=10, opacity=0.75),
+    hovertemplate=(
+        "<b>%{hovertext}</b><br>"
+        "개봉일 스크린수: %{x:,}개<br>"
+        "총 관객: %{y:,}명"
+        "<extra></extra>"
+    )
+)
+
+st.plotly_chart(fig4, use_container_width=True)
+
+st.text_area(
+    "이 그래프로 알 수 있는 것",
+    placeholder="개봉일 스크린수와 총 관객 사이의 관계를 한 문장으로 적어 보세요.",
+    height=80,
+    key="graph4_note"
+)
